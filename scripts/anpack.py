@@ -161,6 +161,8 @@ class ancast:
 	def encrypt(self, file, offset):
 		key = "you gon have to fill this out yourself"
 		iv = "and this too"
+		key = key.decode('hex');
+		iv = iv.decode('hex');
 		file.seek(offset)
 		buffer = ""
 		hash = hashlib.sha1()
