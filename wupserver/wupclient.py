@@ -247,6 +247,12 @@ class wupclient:
         (ret, data) = self.ioctlv(handle, 0x0F, [inbuffer], [0x293], [], [(ptr, size*cnt)])
         return (ret, data[0])
 
+    def FSA_Remove(self, handle, path):
+        inbuffer = buffer(0x520)
+        copy_string(inbuffer, path, 0x04)
+        (ret, _) = self.ioctl(handle, 0x08, inbuffer, 0x293)
+        return ret
+
     def FSA_WriteFilePtr(self, handle, file_handle, size, cnt, ptr):
         inbuffer = buffer(0x520)
         copy_word(inbuffer, size, 0x08)
@@ -335,6 +341,8 @@ class wupclient:
 
     def mkdir(self, path, flags):
         fsa_handle = self.get_fsa_handle()
+        if path[0] != "/":
+            path = self.cwd + "/" + path
         ret = w.FSA_MakeDir(fsa_handle, path, flags)
         if ret == 0:
             return 0
@@ -364,6 +372,8 @@ class wupclient:
 
     def ls(self, path = None, return_data = False):
         fsa_handle = self.get_fsa_handle()
+        if path != None and path[0] != "/":
+            path = self.cwd + "/" + path
         ret, dir_handle = self.FSA_OpenDir(fsa_handle, path if path != None else self.cwd)
         if ret != 0x0:
             print("opendir error : " + hex(ret))
@@ -550,6 +560,53 @@ class wupclient:
             print("group: " + hex(stats[4]))
             print("size: " + hex(stats[5]))
         ret = self.FSA_CloseFile(fsa_handle, file_handle)
+
+    def askyesno(self):
+        yes = set(['yes', 'ye', 'y'])
+        no = set(['no','n', ''])
+        while True:
+            choice = raw_input().lower()
+            if choice in yes:
+               return True
+            elif choice in no:
+               return False
+            else:
+               print("Please respond with 'y' or 'n'")
+
+    def rm(self, filename):
+        fsa_handle = self.get_fsa_handle()
+        if filename[0] != "/":
+            filename = self.cwd + "/" + filename
+        ret, file_handle = self.FSA_OpenFile(fsa_handle, filename, "r")
+        if ret != 0x0:
+            print("rm error : could not open " + filename + " (" + hex(ret) + ")")
+            return
+        self.FSA_CloseFile(fsa_handle, file_handle)
+        print("WARNING: REMOVING A FILE CAN BRICK YOUR CONSOLE, ARE YOU SURE (Y/N)?")
+        if self.askyesno() == True:
+            ret = self.FSA_Remove(fsa_handle, filename)
+            print("rm : " + hex(ret))
+        else:
+            print("rm aborted")
+
+    def rmdir(self, path):
+        fsa_handle = self.get_fsa_handle()
+        if path[0] != "/":
+            path = self.cwd + "/" + path
+        ret, dir_handle = self.FSA_OpenDir(fsa_handle, path)
+        if ret != 0x0:
+            print("rmdir error : could not open " + path + " (" + hex(ret) + ")")
+            return
+        self.FSA_CloseDir(fsa_handle, dir_handle)
+        if len(self.ls(path, True)) != 0:
+            print("rmdir error : directory not empty!")
+            return
+        print("WARNING: REMOVING A DIRECTORY CAN BRICK YOUR CONSOLE, ARE YOU SURE (Y/N)?")
+        if self.askyesno() == True:
+            ret = self.FSA_Remove(fsa_handle, path)
+            print("rmdir : " + hex(ret))
+        else:
+            print("rmdir aborted")
 
     def up(self, local_filename, filename = None):
         fsa_handle = self.get_fsa_handle()
