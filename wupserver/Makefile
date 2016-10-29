@@ -48,6 +48,7 @@ $(PROJECTNAME).elf: $(OFILES)
 	$(LINK) $(LDFLAGS) -o $(PROJECTNAME).elf $(filter-out build/crt0.o, $(OFILES))
 
 clean:
+	@rm -f *.map
 	@rm -f build/*.o build/*.d
 	@rm -f $(PROJECTNAME).elf $(PROJECTNAME).bin
 	@echo "all cleaned up !"
