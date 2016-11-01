@@ -12,7 +12,7 @@ LINK = arm-none-eabi-ld
 AS = arm-none-eabi-as
 OBJCOPY = arm-none-eabi-objcopy
 CFLAGS += -Wall -mbig-endian -std=c99 -march=armv5 -Os -I$(DEVKITPRO)/libnds/include
-LDFLAGS += --script=ccd00.ld -EB -L"$(DEVKITARM)/arm-none-eabi/lib" -Map=output.map
+LDFLAGS += --script=ccd00.ld -EB -L"$(DEVKITARM)/arm-none-eabi/lib"
 
 CFILES = $(wildcard source/*.c)
 BINFILES = $(wildcard data/*.bin)
@@ -45,10 +45,9 @@ $(PROJECTNAME).bin: $(PROJECTNAME).elf
 	$(OBJCOPY) -O binary $< $@
 
 $(PROJECTNAME).elf: $(OFILES)
-	$(LINK) $(LDFLAGS) -o $(PROJECTNAME).elf $(filter-out build/crt0.o, $(OFILES))
+	$(LINK) $(LDFLAGS) -o $(PROJECTNAME).elf $(sort $(filter-out build/crt0.o, $(OFILES)))
 
 clean:
-	@rm -f *.map
 	@rm -f build/*.o build/*.d
 	@rm -f $(PROJECTNAME).elf $(PROJECTNAME).bin
 	@echo "all cleaned up !"
