@@ -34,7 +34,6 @@ fw.img: $(INPUT) $(PATCHED_SECTIONS)
 	@python scripts/anpack.py -in $(INPUT) -out fw.img $(foreach s,$(SECTIONS),-r $(s),patched_sections/$(s).bin) $(foreach s,$(BSS_SECTIONS),-b $(s),patched_sections/$(s).bin)
 
 clean:
-	@rm -f bin/fw.img bin/fw.img.full.bin
 	@rm -f sections/*.bin
 	@rm -r patched_sections
 	@cd wupserver && make clean
