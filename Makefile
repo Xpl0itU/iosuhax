@@ -11,11 +11,9 @@ all: fw.img
 $(INPUT):
 	@cd bin && python getfwimg.py
 
-gensections:
-	@cd sections && python gensections.py
-
-sections/%.bin: $(INPUT) gensections 
+sections/%.bin: $(INPUT) 
 	@mkdir -p sections
+	@cd sections && python gensections.py
 	@python scripts/anpack.py -in $(INPUT) -e $*,$@
 
 extract: $(INPUT_SECTIONS)
@@ -32,9 +30,9 @@ patch: $(PATCHED_SECTIONS)
 
 fw.img: $(INPUT) $(PATCHED_SECTIONS)
 	@python scripts/anpack.py -in $(INPUT) -out fw.img $(foreach s,$(SECTIONS),-r $(s),patched_sections/$(s).bin) $(foreach s,$(BSS_SECTIONS),-b $(s),patched_sections/$(s).bin)
-
+ 
 clean:
-	@rm -f sections/*.bin
-	@rm -r patched_sections
-	@cd wupserver && make clean
 	@rm -f fw.img
+	@rm -f sections/*.bin
+	@rm -fr patched_sections
+	@make -C wupserver clean
