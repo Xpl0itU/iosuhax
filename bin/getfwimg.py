@@ -95,9 +95,10 @@ with open('fw.img.full.bin', 'rb+') as f:
     if zlib.crc32(starbuck_ancast_iv) & 0xffffffff != 0xb3f79023:
         print("starbuck_ancast_iv is wrong")
         sys.exit(1)
-    #save iv for later usage
-    with open('iv.txt', 'w') as iv_store:
-        iv_store.write(codecs.encode(starbuck_ancast_iv, 'hex'))
+    #save key and iv for later usage
+    with open('../scripts/keys.py', 'w') as keys_store:
+        keys_store.write("key=\""+codecs.encode(starbuck_ancast_key, 'hex')+"\"\n")
+        keys_store.write("iv=\""+codecs.encode(starbuck_ancast_iv, 'hex')+"\"\n")
     #calculate correct first bytes with correct iv
     f.seek(0x200,0)
     starbuck_ancast_iv = bytearray(starbuck_ancast_iv)
