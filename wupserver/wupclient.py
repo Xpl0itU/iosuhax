@@ -26,7 +26,7 @@ def get_string(buffer, offset):
 class wupclient:
     s=None
 
-    def __init__(self, ip='192.168.1.20', port=1337):
+    def __init__(self, ip='192.168.0.197', port=1337):
         self.s=socket.socket()
         self.s.connect((ip, port))
         self.fsa_handle = None
@@ -620,8 +620,6 @@ class wupclient:
             print("rmdir : " + hex(ret))
         else:
             print("rmdir aborted")
-            
-        return
 
     def up(self, local_filename, filename = None):
         fsa_handle = self.get_fsa_handle()
