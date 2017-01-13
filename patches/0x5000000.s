@@ -10,17 +10,11 @@ MCP_BSS_START equ (0x5074000 + 0x48574)
 MCP_FSA_OPEN_T equ 0x05059160
 MCP_FSA_MOUNT_T equ 0x05059530
 MCP_SYSLOG_OUTPUT_T equ 0x05059140
-MCP_SYSLOG_OUTPUT_ARM equ 0x0503DCF0
 
 MCP_SVC_CREATETHREAD equ 0x050567EC
 MCP_SVC_STARTTHREAD equ 0x05056824
 
 NEW_TIMEOUT equ (0xFFFFFFFF) ; over an hour
-
-; redirect debug mcp output to /dev/syslog
-.org 0x05055454
-	.arm
-	bl MCP_SYSLOG_OUTPUT_ARM
 
 ; fix 10 minute timeout that crashes MCP after 10 minutes of booting
 .org 0x05022474
@@ -42,6 +36,11 @@ NEW_TIMEOUT equ (0xFFFFFFFF) ; over an hour
 	.arm
 	mov r0, #0
 	bx lr
+
+; patch cached cert check
+.org 0x0504C7BC
+	.arm
+	mov r0, #0
 
 ; patch cert verification
 .org 0x05052A90
@@ -68,7 +67,7 @@ NEW_TIMEOUT equ (0xFFFFFFFF) ; over an hour
 		mov r11, r0
 		push {r0-r11,lr}
 		sub sp, #8
-		
+
 		mov r0, #0x78
 		str r0, [sp] ; prio
 		mov r0, #1
@@ -97,7 +96,7 @@ NEW_TIMEOUT equ (0xFFFFFFFF) ; over an hour
 		sub sp, #8
 
 		bl MCP_SYSLOG_OUTPUT_T
-		
+
 		mov r0, #0
 		bl MCP_FSA_OPEN_T
 
